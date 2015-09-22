@@ -2,6 +2,7 @@
 
 use Laravel\Lumen\Routing\Controller as BaseController;
 use App\Models\Campaign;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -9,24 +10,12 @@ class CampaignsController extends BaseController
 {
   public function index(Request $request)
   {
-    $limit  = $request->input('limit') ? $request->input('limit') : 10;
-    $page   = $request->input('page') ? $request->input('page') : 1;
+    $limit          = $request->input('limit') ? $request->input('limit') : 10;
+    $dataCampaigns  = Campaign::paginate($limit);
 
-    $offset = ($page - 1) * $limit;
+    if($request->input('limit'))
+        $dataCampaigns->appends('limit', $request->input('limit'));
 
-    $total  = Campaign::count();
-    $dataCampaigns = Campaign::take($limit)->offset($offset)->get();
-
-    $data = [
-        'meta' => [
-            'page' => (int)$page,
-            'current_total' => count($dataCampaigns),
-            'total' => $total
-        ],
-        'campaigns' => $dataCampaigns
-    ];
-
-    return $data;
+    return $dataCampaigns;
   }
-
 }
